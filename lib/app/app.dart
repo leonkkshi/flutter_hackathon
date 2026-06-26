@@ -4,46 +4,45 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hackathon/app/routes/app_route.dart';
 import 'package:flutter_hackathon/core/network/api_client.dart';
 import 'package:flutter_hackathon/feature/application/service/impls/auth_service_impl.dart';
+import 'package:flutter_hackathon/feature/application/service/impls/task_service_impl.dart';
 import 'package:flutter_hackathon/feature/application/service/impls/user_service_impl.dart';
 import 'package:flutter_hackathon/feature/application/service/interfaces/i_auth_service.dart';
+import 'package:flutter_hackathon/feature/application/service/interfaces/i_task_service.dart';
 import 'package:flutter_hackathon/feature/application/service/interfaces/i_user_service.dart';
 import 'package:flutter_hackathon/feature/data/datasource/auth_local_data_source.dart';
 import 'package:flutter_hackathon/feature/data/datasource/auth_remote_data_source.dart';
+import 'package:flutter_hackathon/feature/data/datasource/task_local_data_source.dart';
 import 'package:flutter_hackathon/feature/data/datasource/user_remote_data_source.dart';
-import 'package:flutter_hackathon/feature/data/datasource/video_local_data_source.dart';
 import 'package:flutter_hackathon/feature/data/impl_repositories/auth_repository_impl.dart';
+import 'package:flutter_hackathon/feature/data/impl_repositories/task_repository_impl.dart';
 import 'package:flutter_hackathon/feature/data/impl_repositories/user_repository_impl.dart';
-import 'package:flutter_hackathon/feature/data/impl_repositories/video_repository_impl.dart';
 import 'package:flutter_hackathon/feature/data/mappers/auth/auth_mapper.dart';
 import 'package:flutter_hackathon/feature/data/mappers/user/user_item_mapper.dart';
 import 'package:flutter_hackathon/feature/domain/i_repositories/i_auth_repository.dart';
+import 'package:flutter_hackathon/feature/domain/i_repositories/i_task_repository.dart';
 import 'package:flutter_hackathon/feature/domain/i_repositories/i_user_repository.dart';
-import 'package:flutter_hackathon/feature/domain/i_repositories/i_video_repository.dart';
-import 'package:flutter_hackathon/feature/application/service/interfaces/i_video_service.dart';
-import 'package:flutter_hackathon/feature/application/service/impls/video_service_impl.dart';
 import 'package:flutter_hackathon/feature/presentation/viewmodel/login_view_model.dart';
+import 'package:flutter_hackathon/feature/presentation/viewmodel/task_view_model.dart';
 import 'package:flutter_hackathon/feature/presentation/viewmodel/user_management_view_model.dart';
-import 'package:flutter_hackathon/feature/presentation/viewmodel/video_view_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
 
     return MultiProvider(
       providers: [
         // ── Infrastructure ───────────────────────────────────────────
-        Provider<Dio>(
-          create: (_) => ApiClient.createDio(),
-        ),
+        Provider<Dio>(create: (_) => ApiClient.createDio()),
 
         // ── Auth datasources ─────────────────────────────────────────
         Provider<AuthRemoteDataSource>(
@@ -57,17 +56,11 @@ class MyApp extends StatelessWidget {
         Provider<UserRemoteDataSource>(
           create: (ctx) => UserRemoteDataSource(ctx.read<Dio>()),
         ),
-        Provider<VideoLocalDataSource>(
-          create: (_) => VideoLocalDataSource(const FlutterSecureStorage()),
-        ),
+        Provider<TaskLocalDataSource>(create: (_) => TaskLocalDataSource()),
 
         // ── Mappers ───────────────────────────────────────────────────
-        Provider<AuthMapper>(
-          create: (_) => AuthMapper(),
-        ),
-        Provider<UserItemMapper>(
-          create: (_) => UserItemMapper(),
-        ),
+        Provider<AuthMapper>(create: (_) => AuthMapper()),
+        Provider<UserItemMapper>(create: (_) => UserItemMapper()),
 
         // ── Repositories ──────────────────────────────────────────────
         Provider<IAuthRepository>(
@@ -83,21 +76,19 @@ class MyApp extends StatelessWidget {
             mapper: ctx.read<UserItemMapper>(),
           ),
         ),
-        Provider<IVideoRepository>(
-          create: (ctx) => VideoRepositoryImpl(
-            localDataSource: ctx.read<VideoLocalDataSource>(),
+        Provider<ITaskRepository>(
+          create: (ctx) => TaskRepositoryImpl(
+            localDataSource: ctx.read<TaskLocalDataSource>(),
           ),
         ),
 
         // ── Services ──────────────────────────────────────────────────
-        Provider<IAuthService>(
-          create: (_) => AuthServiceImpl(),
-        ),
+        Provider<IAuthService>(create: (_) => AuthServiceImpl()),
         Provider<IUserService>(
           create: (ctx) => UserServiceImpl(ctx.read<IUserRepository>()),
         ),
-        Provider<IVideoService>(
-          create: (ctx) => VideoServiceImpl(ctx.read<IVideoRepository>()),
+        Provider<ITaskService>(
+          create: (ctx) => TaskServiceImpl(ctx.read<ITaskRepository>()),
         ),
 
         // ── ViewModels ────────────────────────────────────────────────
@@ -107,10 +98,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<UserManagementViewModel>(
           create: (ctx) => UserManagementViewModel(ctx.read<IUserService>()),
         ),
-        ChangeNotifierProvider<VideoViewModel>(
-          create: (ctx) => VideoViewModel(ctx.read<IVideoService>()),
+        ChangeNotifierProvider<TaskViewModel>(
+          create: (ctx) => TaskViewModel(ctx.read<ITaskService>()),
         ),
-
       ],
       child: MaterialApp(
         title: 'Flutter MVVM Login',
