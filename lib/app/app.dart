@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
 
         // ── Services ──────────────────────────────────────────────────
         Provider<IAuthService>(
-          create: (ctx) => AuthServiceImpl(ctx.read<IAuthRepository>()),
+          create: (_) => AuthServiceImpl(),
         ),
         Provider<IUserService>(
           create: (ctx) => UserServiceImpl(ctx.read<IUserRepository>()),
